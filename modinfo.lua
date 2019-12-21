@@ -1,7 +1,7 @@
 name = "Home Duplicating"
 description = ""
 author = "辣椒小皇纸"
-version = "1.0.1"
+version = "1.1.0"
 
 forumthread = ""
 

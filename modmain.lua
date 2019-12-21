@@ -1,5 +1,5 @@
 if not GLOBAL.TheNet:GetIsServer() then
-	return
+    return
 end
 
 local io = GLOBAL.require("io")
@@ -9,104 +9,241 @@ local tonumber = GLOBAL.tonumber
 
 --储存列表到文件
 local function list_save(list, file)
-	save_file = io.open(MODROOT..file, "w")
-	for k,v in pairs(list) do
-		for a,b in pairs(v) do
-			save_file:write(b..",")
-		end
-		save_file:write("\n")
-	end
-	save_file:close()
+    save_file = io.open(MODROOT..file, "w")
+    for k,v in pairs(list) do
+        for a,b in pairs(v) do
+            save_file:write(b..",")
+        end
+        save_file:write("\n")
+    end
+    save_file:close()
 end
 
 --从文件读取列表
 local function list_load(file)
-	local list_from_file = {}
-	load_file = io.open(MODROOT..file, "r")
-	for line in load_file:lines() do
-		local read_line = {}
-		for w in string.gmatch(line,"([^',']+)") do     --按照“,”分割字符串
-		    table.insert(read_line, w)
-		end
-		table.insert(list_from_file, read_line)
-	end
-	load_file:close()
-	for k,v in pairs(list_from_file) do
-		print(k)
-	end
-	return list_from_file
+    local list_from_file = {}
+    load_file = io.open(MODROOT..file, "r")
+    for line in load_file:lines() do
+        local read_line = {}
+        for w in string.gmatch(line,"([^',']+)") do     --按照“,”分割字符串
+            table.insert(read_line, w)
+        end
+        table.insert(list_from_file, read_line)
+    end
+    load_file:close()
+    for k,v in pairs(list_from_file) do
+        print(k)
+    end
+    return list_from_file
 end
 
 --判定哪些物品列入复制的项目
 local function ShouldCopy(inst)
-	if inst and inst:HasTag("structure") then
-		return true
-	end
-	return false
+    if inst then
+        if inst:HasTag("structure")
+        or inst:HasTag("wall")
+        or inst:HasTag("flower")
+        or inst:HasTag("telebase")
+        or inst:HasTag("heavy")
+        or inst:HasTag("eyeturret")
+        or inst.prefab == "grass"
+        or inst.prefab == "sapling"
+        or inst.prefab == "rock_avocado_bush"
+        or inst.prefab == "berrybush"
+        or inst.prefab == "berrybush2"
+        or inst.prefab == "berrybush_juicy"
+        then
+            return true
+        end
+    end
+    return false
+end
+
+--判定哪些物品要清理
+local function ShouldRemove(inst)
+    if inst:HasTag("player") 
+    or (inst.components.inventoryitem and inst.components.inventoryitem.owner ~= nil)
+    then
+        return false
+    end
+    return true
+end
+
+--判断是否可生成地皮
+local function CanTurf(pt)
+    local ground = GLOBAL.GetWorld()
+    if ground then
+        local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
+        return tile ~= GLOBAL.GROUND.IMPASSIBLE and tile < GLOBAL.GROUND.UNDERGROUND --and not ground.Map:IsWater(tile)
+    end
+    return false
+end
+
+--生成地皮
+local function SpawnTurf(turf, pt)   
+    local ground = GLOBAL.GetWorld()
+    if ground and CanTurf(pt) then
+        local original_tile_type = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
+        local x, y = ground.Map:GetTileCoordsAtPoint(pt.x, pt.y, pt.z)
+        if x and y then
+            ground.Map:SetTile(x, y, turf)
+            ground.Map:RebuildLayer(original_tile_type, x, y)
+            ground.Map:RebuildLayer(turf, x, y)
+        end
+        local minimap = TheSim:FindFirstEntityWithTag("minimap")
+        if minimap then
+            minimap.MiniMap:RebuildLayer(original_tile_type, x, y)
+            minimap.MiniMap:RebuildLayer(turf, x, y)
+        end
+    end
 end
 
 --主函数
 local NetworkingSay = GLOBAL.Networking_Say
 GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, ...)
-	NetworkingSay(guid, userid, name, prefab, message, colour, whisper, ...)
-	--保存基地，record的首字母
-	if string.sub(message,1,2)=="+r" and string.len(message) >= 3 and tonumber(string.sub(message,3,-1)) ~= nil then
-		local player
-		for i, v in ipairs(GLOBAL.AllPlayers) do
-			if v.userid == userid then
-				player = v
-			end
-		end
-		if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
-			local x, y, z = player.Transform:GetWorldPosition()
-			x = math.floor(x/4)*4
-			y = 0
-			z = math.floor(z/4)*4
+    NetworkingSay(guid, userid, name, prefab, message, colour, whisper, ...)
+    --保存基地，范围为圆形，以人为中心，后面带参数为半径，单位为大格
+    if string.sub(message,1,7)=="+record" and string.len(message) >= 8 and tonumber(string.sub(message,8,-1)) ~= nil then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
 
-			local radius = tonumber(string.sub(message,3,-1)) * 6
-			local entity_list = TheSim:FindEntities(x, y, z, radius)
-			local ents_list = {}
-			for i, entity in pairs(entity_list) do
-				if ShouldCopy(entity) then
-					local pos_in_world = Vector3(entity.Transform:GetWorldPosition())
-					local pos_in_relative = Vector3(pos_in_world.x-x, pos_in_world.y-y, pos_in_world.z-z)
-					local orient_in_world = entity.Transform:GetRotation()
-					local entity_record = {entity.prefab, pos_in_relative.x, pos_in_relative.z, orient_in_world}
-					table.insert(ents_list, entity_record)
-				end
-			end
-			list_save(ents_list, "homedata")
-		end
-	end
-	--部署基地，deploy的首字母
-	if string.sub(message,1,2)=="+d" then
-		local player
-		for i, v in ipairs(GLOBAL.AllPlayers) do
-			if v.userid == userid then
-				player = v
-			end
-		end
-		if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
-			local x, y, z = player.Transform:GetWorldPosition()
-			x = math.floor(x/4)*4
-			y = 0
-			z = math.floor(z/4)*4
-			local ents_list = list_load("homedata")				
-			for k,v in pairs(ents_list) do
-				local ents_prefab = v[1]
-				local pos_in_relative = Vector3(v[2],0,v[3])
-				local orient_in_world = v[4]
-				local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
+            local radius = tonumber(string.sub(message,8,-1)) * 4
+            local entity_list = TheSim:FindEntities(x, y, z, radius)
+            local ents_list = {}
+            for i, entity in pairs(entity_list) do
+                if ShouldCopy(entity) then
+                    local pos_in_world = Vector3(entity.Transform:GetWorldPosition())
+                    local pos_in_relative = Vector3(pos_in_world.x-x, pos_in_world.y-y, pos_in_world.z-z)
+                    local orient_in_world = entity.Transform:GetRotation()
+                    local entity_record = {entity.prefab, pos_in_relative.x, pos_in_relative.z, orient_in_world}
+                    table.insert(ents_list, entity_record)
+                end
+            end
+            list_save(ents_list, "homedata")
+        end
+    end
 
-				local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(pos_in_world.x, pos_in_world.y, pos_in_world.z) --目标坐标的地皮
-				local canspawn = tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and tile ~= 255 --判定是否可以再生
+    --部署基地，范围为圆形，以人为中心
+    if string.sub(message,1,7)=="+deploy" and string.len(message) == 7 then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
+            local ents_list = list_load("homedata")                
+            for k,v in pairs(ents_list) do
+                local ents_prefab = v[1]
+                local pos_in_relative = Vector3(v[2],0,v[3])
+                local orient_in_world = v[4]
+                local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
 
-				if canspawn then
-					local spawn_prefab = SpawnPrefab(ents_prefab)
-					spawn_prefab.Transform:SetPosition(pos_in_world:Get())
-					spawn_prefab.Transform:SetRotation(orient_in_world)
-				end
-			end
-		end
-	end
+                local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(pos_in_world.x, pos_in_world.y, pos_in_world.z) --目标坐标的地皮
+                local canspawn = tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and tile ~= 255 --判定是否可以再生
+
+                if canspawn then
+                    local spawn_prefab = SpawnPrefab(ents_prefab)
+                    spawn_prefab.Transform:SetPosition(pos_in_world:Get())
+                    spawn_prefab.Transform:SetRotation(orient_in_world)
+                end
+            end
+        end
+    end
+
+    --删除范围内物品，范围为圆形，以人为中心，后面带参数为半径，单位为大格
+    if string.sub(message,1,5)=="+wipe" and string.len(message) >= 6 and tonumber(string.sub(message,6,-1)) ~= nil then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
+
+            local radius = tonumber(string.sub(message,6,-1)) * 4
+            local entity_list = TheSim:FindEntities(x, y, z, radius)
+            for i, entity in pairs(entity_list) do
+                if ShouldRemove(entity) then
+                    entity:Remove()
+                end
+            end
+        end
+    end
+
+    --保存地皮，范围为正方形，以人为中心，后面带参数为边长，单位为大格
+    if string.sub(message,1,11)=="+tilerecord" and string.len(message) >= 12 and tonumber(string.sub(message,12,-1)) ~= nil then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
+
+            local length = tonumber(string.sub(message,12,-1))
+
+            local turf_list = {}
+            local turf_style = {}
+
+            for i= (x/4-length+0.5)*4, (x/4+length-0.5)*4, 4 do
+                for j = (z/4-length+0.5)*4, (z/4+length-0.5)*4, 4 do
+                    if CanTurf(Vector3(i, 0, j)) then
+                        local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(i, 0, j)
+                        local pos_in_world = Vector3(i, 0, j)
+                        local pos_in_relative = Vector3(pos_in_world.x-x, pos_in_world.y-y, pos_in_world.z-z)
+                        turf_style = {tile, pos_in_relative.x, pos_in_relative.z}
+                        table.insert(turf_list, turf_style)
+                    end
+                end
+            end
+            list_save(turf_list, "tiledata")
+        end
+    end
+
+    --部署地皮，范围为正方形，以人为中心
+    if string.sub(message,1,11)=="+tiledeploy" and string.len(message) == 11 then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
+
+            local turf_list = list_load("tiledata")
+            local tile_num
+            for k,v in pairs(turf_list) do
+                tile_num = v[1]
+                local pos_in_relative = Vector3(v[2],0,v[3])
+                local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
+                SpawnTurf(tile_num, pos_in_world)
+            end
+        end
+    end
 end
