@@ -5,6 +5,7 @@ end
 local io = GLOBAL.require("io")
 local Vector3 = GLOBAL.Vector3
 local SpawnPrefab = GLOBAL.SpawnPrefab
+local tonumber = GLOBAL.tonumber
 
 --储存列表到文件
 local function list_save(list, file)
@@ -49,7 +50,7 @@ local NetworkingSay = GLOBAL.Networking_Say
 GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, ...)
 	NetworkingSay(guid, userid, name, prefab, message, colour, whisper, ...)
 	--保存基地，record的首字母
-	if string.sub(message,1,2)=="+r" then
+	if string.sub(message,1,2)=="+r" and string.len(message) >= 3 and tonumber(string.sub(message,3,-1)) ~= nil then
 		local player
 		for i, v in ipairs(GLOBAL.AllPlayers) do
 			if v.userid == userid then
@@ -61,7 +62,9 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
 			x = math.floor(x/4)*4
 			y = 0
 			z = math.floor(z/4)*4
-			local entity_list = TheSim:FindEntities(x, y, z, 12*3)
+
+			local radius = tonumber(string.sub(message,3,-1)) * 6
+			local entity_list = TheSim:FindEntities(x, y, z, radius)
 			local ents_list = {}
 			for i, entity in pairs(entity_list) do
 				if ShouldCopy(entity) then
@@ -72,7 +75,7 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
 					table.insert(ents_list, entity_record)
 				end
 			end
-			list_save(ents_list, "list.txt")
+			list_save(ents_list, "homedata")
 		end
 	end
 	--部署基地，deploy的首字母
@@ -88,14 +91,14 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
 			x = math.floor(x/4)*4
 			y = 0
 			z = math.floor(z/4)*4
-			local ents_list = list_load("list.txt")				
+			local ents_list = list_load("homedata")				
 			for k,v in pairs(ents_list) do
 				local ents_prefab = v[1]
 				local pos_in_relative = Vector3(v[2],0,v[3])
 				local orient_in_world = v[4]
 				local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
 
-				local tile = TheWorld.Map:GetTileAtPoint(pos_in_world.x, pos_in_world.y, pos_in_world.z) --目标坐标的地皮
+				local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(pos_in_world.x, pos_in_world.y, pos_in_world.z) --目标坐标的地皮
 				local canspawn = tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and tile ~= 255 --判定是否可以再生
 
 				if canspawn then
