@@ -46,6 +46,7 @@ local function ShouldCopy(inst)
         or inst:HasTag("telebase")
         or inst:HasTag("heavy")
         or inst:HasTag("eyeturret")
+        or inst:HasTag("sign")
         or inst.prefab == "grass"
         or inst.prefab == "sapling"
         or inst.prefab == "rock_avocado_bush"
@@ -59,14 +60,14 @@ local function ShouldCopy(inst)
     return false
 end
 
---判定哪些物品要清理
-local function ShouldRemove(inst)
-    if inst:HasTag("player") 
-    or (inst.components.inventoryitem and inst.components.inventoryitem.owner ~= nil)
-    then
-        return false
+--判断物品是否在范围内
+local function InRange(inst,x,z,length)
+    local pos = Vector3(inst.Transform:GetWorldPosition())
+    local length =length*4
+    if pos.x>=x-length/2 and pos.x<=x+length/2 and pos.z>=z-length/2 and pos.z<=z+length then
+        return true
     end
-    return true
+    return false
 end
 
 --判断是否可生成地皮
@@ -98,11 +99,22 @@ local function SpawnTurf(turf, pt)
     end
 end
 
+--判定哪些物品要清理
+local function ShouldRemove(inst)
+    if (inst.components.inventoryitem and inst.components.inventoryitem.owner == nil) --排除人物身上的物品
+    or inst:HasTag("structure")
+    or (inst.components.burnable ~= nil and not inst:HasTag("player")) --包括所有可燃的，因玩家也可燃，故需排除
+    then
+        return true
+    end
+    return false
+end
+
 --主函数
 local NetworkingSay = GLOBAL.Networking_Say
 GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, ...)
     NetworkingSay(guid, userid, name, prefab, message, colour, whisper, ...)
-    --保存基地，范围为圆形，以人为中心，后面带参数为半径，单位为大格
+    --保存，范围为正方形，以人为中心，后面带参数为边长，单位为大格
     if string.sub(message,1,7)=="+record" and string.len(message) >= 8 and tonumber(string.sub(message,8,-1)) ~= nil then
         local player
         for i, v in ipairs(GLOBAL.AllPlayers) do
@@ -116,11 +128,11 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             y = 0
             z = math.floor(z/4+0.5)*4
 
-            local radius = tonumber(string.sub(message,8,-1)) * 4
-            local entity_list = TheSim:FindEntities(x, y, z, radius)
+            --基地
+            local length = tonumber(string.sub(message,8,-1))
             local ents_list = {}
-            for i, entity in pairs(entity_list) do
-                if ShouldCopy(entity) then
+            for i, entity in pairs(GLOBAL.Ents) do
+                if ShouldCopy(entity) and InRange(entity, x, z, length) then
                     local pos_in_world = Vector3(entity.Transform:GetWorldPosition())
                     local pos_in_relative = Vector3(pos_in_world.x-x, pos_in_world.y-y, pos_in_world.z-z)
                     local orient_in_world = entity.Transform:GetRotation()
@@ -129,81 +141,8 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 end
             end
             list_save(ents_list, "homedata")
-        end
-    end
 
-    --部署基地，范围为圆形，以人为中心
-    if string.sub(message,1,7)=="+deploy" and string.len(message) == 7 then
-        local player
-        for i, v in ipairs(GLOBAL.AllPlayers) do
-            if v.userid == userid then
-                player = v
-            end
-        end
-        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
-            local x, y, z = player.Transform:GetWorldPosition()
-            x = math.floor(x/4+0.5)*4
-            y = 0
-            z = math.floor(z/4+0.5)*4
-            local ents_list = list_load("homedata")                
-            for k,v in pairs(ents_list) do
-                local ents_prefab = v[1]
-                local pos_in_relative = Vector3(v[2],0,v[3])
-                local orient_in_world = v[4]
-                local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
-
-                local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(pos_in_world.x, pos_in_world.y, pos_in_world.z) --目标坐标的地皮
-                local canspawn = tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and tile ~= 255 --判定是否可以再生
-
-                if canspawn then
-                    local spawn_prefab = SpawnPrefab(ents_prefab)
-                    spawn_prefab.Transform:SetPosition(pos_in_world:Get())
-                    spawn_prefab.Transform:SetRotation(orient_in_world)
-                end
-            end
-        end
-    end
-
-    --删除范围内物品，范围为圆形，以人为中心，后面带参数为半径，单位为大格
-    if string.sub(message,1,5)=="+wipe" and string.len(message) >= 6 and tonumber(string.sub(message,6,-1)) ~= nil then
-        local player
-        for i, v in ipairs(GLOBAL.AllPlayers) do
-            if v.userid == userid then
-                player = v
-            end
-        end
-        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
-            local x, y, z = player.Transform:GetWorldPosition()
-            x = math.floor(x/4+0.5)*4
-            y = 0
-            z = math.floor(z/4+0.5)*4
-
-            local radius = tonumber(string.sub(message,6,-1)) * 4
-            local entity_list = TheSim:FindEntities(x, y, z, radius)
-            for i, entity in pairs(entity_list) do
-                if ShouldRemove(entity) then
-                    entity:Remove()
-                end
-            end
-        end
-    end
-
-    --保存地皮，范围为正方形，以人为中心，后面带参数为边长，单位为大格
-    if string.sub(message,1,11)=="+tilerecord" and string.len(message) >= 12 and tonumber(string.sub(message,12,-1)) ~= nil then
-        local player
-        for i, v in ipairs(GLOBAL.AllPlayers) do
-            if v.userid == userid then
-                player = v
-            end
-        end
-        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
-            local x, y, z = player.Transform:GetWorldPosition()
-            x = math.floor(x/4+0.5)*4
-            y = 0
-            z = math.floor(z/4+0.5)*4
-
-            local length = tonumber(string.sub(message,12,-1))
-
+            --地皮
             local turf_list = {}
             local turf_style = {}
 
@@ -222,8 +161,8 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
         end
     end
 
-    --部署地皮，范围为正方形，以人为中心
-    if string.sub(message,1,11)=="+tiledeploy" and string.len(message) == 11 then
+    --部署，范围为正方形，以人为中心
+    if string.sub(message,1,7)=="+deploy" and string.len(message) == 7 then
         local player
         for i, v in ipairs(GLOBAL.AllPlayers) do
             if v.userid == userid then
@@ -236,6 +175,24 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             y = 0
             z = math.floor(z/4+0.5)*4
 
+            --基地
+            local ents_list = list_load("homedata")                
+            for k,v in pairs(ents_list) do
+                local ents_prefab = v[1]
+                local pos_in_relative = Vector3(v[2],0,v[3])
+                local orient_in_world = v[4]
+                local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
+
+                local canspawn = CanTurf(pos_in_world) --判定是否可以再生
+
+                if canspawn then
+                    local spawn_prefab = SpawnPrefab(ents_prefab)
+                    spawn_prefab.Transform:SetPosition(pos_in_world:Get())
+                    spawn_prefab.Transform:SetRotation(orient_in_world)
+                end
+            end
+
+            --地皮
             local turf_list = list_load("tiledata")
             local tile_num
             for k,v in pairs(turf_list) do
@@ -243,6 +200,29 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 local pos_in_relative = Vector3(v[2],0,v[3])
                 local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
                 SpawnTurf(tile_num, pos_in_world)
+            end
+        end
+    end
+
+    --删除范围内物品，范围为正方形，以人为中心，后面带参数为边长，单位为大格
+    if string.sub(message,1,5)=="+wipe" and string.len(message) >= 6 and tonumber(string.sub(message,6,-1)) ~= nil then
+        local player
+        for i, v in ipairs(GLOBAL.AllPlayers) do
+            if v.userid == userid then
+                player = v
+            end
+        end
+        if player ~= nil and player.userid == userid and player.Network:IsServerAdmin() then
+            local x, y, z = player.Transform:GetWorldPosition()
+            x = math.floor(x/4+0.5)*4
+            y = 0
+            z = math.floor(z/4+0.5)*4
+
+            local length = tonumber(string.sub(message,6,-1))
+            for i, entity in pairs(GLOBAL.Ents) do
+                if ShouldRemove(entity) and InRange(entity, x, z, length) then
+                    entity:Remove()
+                end
             end
         end
     end
