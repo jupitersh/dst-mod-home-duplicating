@@ -122,6 +122,7 @@ local function ShouldRemove(inst)
     if (inst.components.inventoryitem and inst.components.inventoryitem.owner == nil) --排除人物身上的物品
     or inst:HasTag("structure")
     or (inst.components.burnable ~= nil and not inst:HasTag("player")) --包括所有可燃的，因玩家也可燃，故需排除
+    or inst:HasTag("boulder")
     then
         return true
     end
