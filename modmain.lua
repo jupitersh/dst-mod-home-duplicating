@@ -6,6 +6,22 @@ local io = GLOBAL.require("io")
 local Vector3 = GLOBAL.Vector3
 local SpawnPrefab = GLOBAL.SpawnPrefab
 local tonumber = GLOBAL.tonumber
+local os = GLOBAL.os
+local TheNet = GLOBAL.TheNet
+local lang = TheNet:GetDefaultServerLanguage()
+
+local icon_list = {"󰀜","󰀝","󰀞","󰀘","󰀁","󰀟","󰀠","󰀡","󰀂","󰀃","󰀄","󰀅","󰀢","󰀣","󰀇","󰀤","󰀈","󰀙","󰀉","󰀚","󰀊","󰀋","󰀌","󰀍","󰀥","󰀎","󰀏","󰀀","󰀦","󰀐","󰀑","󰀒","󰀧","󰀨","󰀓","󰀔","󰀆","󰀩","󰀪","󰀕","󰀗","󰀫","󰀖","󰀛","󰀬","󰀭","󰀮","󰀯",}
+
+local talkstring = {}
+if lang == "zh" then
+    talkstring.record = "基地已记录"
+    talkstring.deploy = "基地已部署"
+    talkstring.wipe = "部署范围已清空"
+else
+    talkstring.record = "Your Home Has Been Recorded"
+    talkstring.deploy = "Your Home Has Been Deployed"
+    talkstring.wipe = "The Area Ready for Deploy Has Been Wiped"
+end
 
 --储存列表到文件
 local function list_save(list, file)
@@ -127,7 +143,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             x = math.floor(x/4+0.5)*4
             y = 0
             z = math.floor(z/4+0.5)*4
-
             --基地
             local length = tonumber(string.sub(message,8,-1))
             local ents_list = {}
@@ -141,7 +156,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 end
             end
             list_save(ents_list, "homedata")
-
             --地皮
             local turf_list = {}
             local turf_style = {}
@@ -159,6 +173,10 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             end
             list_save(turf_list, "tiledata")
         end
+        --执行命令后人物说话提示
+        math.randomseed(os.time())
+        local icon_num = math.random(1,48)
+        player.components.talker:Say(icon_list[icon_num]..talkstring.record..icon_list[icon_num+1],10,true,true,false)
     end
 
     --部署，范围为正方形，以人为中心
@@ -174,7 +192,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             x = math.floor(x/4+0.5)*4
             y = 0
             z = math.floor(z/4+0.5)*4
-
             --基地
             local ents_list = list_load("homedata")                
             for k,v in pairs(ents_list) do
@@ -191,7 +208,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                     spawn_prefab.Transform:SetRotation(orient_in_world)
                 end
             end
-
             --地皮
             local turf_list = list_load("tiledata")
             local tile_num
@@ -202,6 +218,10 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 SpawnTurf(tile_num, pos_in_world)
             end
         end
+        --执行命令后人物说话提示
+        math.randomseed(os.time())
+        local icon_num = math.random(1,48)
+        player.components.talker:Say(icon_list[icon_num]..talkstring.deploy..icon_list[icon_num+1],10,true,true,false)
     end
 
     --删除范围内物品，范围为正方形，以人为中心，后面带参数为边长，单位为大格
@@ -225,5 +245,9 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 end
             end
         end
+        --执行命令后人物说话提示
+        math.randomseed(os.time())
+        local icon_num = math.random(1,48)
+        player.components.talker:Say(icon_list[icon_num]..talkstring.wipe..icon_list[icon_num+1],10,true,true,false)
     end
 end
