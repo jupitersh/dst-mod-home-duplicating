@@ -11,6 +11,8 @@ local TheNet = GLOBAL.TheNet
 local lang = TheNet:GetDefaultServerLanguage()
 
 local icon_list = {"󰀜","󰀝","󰀞","󰀘","󰀁","󰀟","󰀠","󰀡","󰀂","󰀃","󰀄","󰀅","󰀢","󰀣","󰀇","󰀤","󰀈","󰀙","󰀉","󰀚","󰀊","󰀋","󰀌","󰀍","󰀥","󰀎","󰀏","󰀀","󰀦","󰀐","󰀑","󰀒","󰀧","󰀨","󰀓","󰀔","󰀆","󰀩","󰀪","󰀕","󰀗","󰀫","󰀖","󰀛","󰀬","󰀭","󰀮","󰀯",}
+math.randomseed(os.time())
+local icon_num = math.random(1,48)
 
 local talkstring = {}
 if lang == "zh" then
@@ -174,8 +176,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             list_save(turf_list, "tiledata")
         end
         --执行命令后人物说话提示
-        math.randomseed(os.time())
-        local icon_num = math.random(1,48)
         player.components.talker:Say(icon_list[icon_num]..talkstring.record..icon_list[icon_num+1],10,true,true,false)
     end
 
@@ -219,8 +219,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             end
         end
         --执行命令后人物说话提示
-        math.randomseed(os.time())
-        local icon_num = math.random(1,48)
         player.components.talker:Say(icon_list[icon_num]..talkstring.deploy..icon_list[icon_num+1],10,true,true,false)
     end
 
@@ -246,8 +244,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             end
         end
         --执行命令后人物说话提示
-        math.randomseed(os.time())
-        local icon_num = math.random(1,48)
         player.components.talker:Say(icon_list[icon_num]..talkstring.wipe..icon_list[icon_num+1],10,true,true,false)
     end
 end
