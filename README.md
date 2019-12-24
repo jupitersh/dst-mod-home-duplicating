@@ -30,6 +30,11 @@ The Data of your base will be saved in the Mod folder `mods\workshop-1942653373`
 
 ## Changelog
 
+**List of tweaks I made for version 1.4.0**
+
+- Now we can record things in the chest and deploy them.
+- Change the save location.
+
 ## License
 
 Released under the [GNU GENERAL PUBLIC LICENSE](https://www.gnu.org/licenses/gpl-3.0.en.html)

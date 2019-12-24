@@ -27,7 +27,7 @@ end
 
 --储存列表到文件
 local function list_save(list, file)
-    save_file = io.open(MODROOT..file, "w")
+    save_file = io.open(MODROOT.."/data/"..file, "w")
     for k,v in pairs(list) do
         for a,b in pairs(v) do
             save_file:write(b..",")
@@ -40,7 +40,7 @@ end
 --从文件读取列表
 local function list_load(file)
     local list_from_file = {}
-    load_file = io.open(MODROOT..file, "r")
+    load_file = io.open(MODROOT.."/data/"..file, "r")
     for line in load_file:lines() do
         local read_line = {}
         for w in string.gmatch(line,"([^',']+)") do     --按照“,”分割字符串
@@ -49,9 +49,6 @@ local function list_load(file)
         table.insert(list_from_file, read_line)
     end
     load_file:close()
-    for k,v in pairs(list_from_file) do
-        print(k)
-    end
     return list_from_file
 end
 
@@ -122,7 +119,8 @@ local function ShouldRemove(inst)
     if (inst.components.inventoryitem and inst.components.inventoryitem.owner == nil) --排除人物身上的物品
     or inst:HasTag("structure")
     or (inst.components.burnable ~= nil and not inst:HasTag("player")) --包括所有可燃的，因玩家也可燃，故需排除
-    or inst:HasTag("boulder")
+    or inst:HasTag("boulder") --石矿
+    or inst.prefab == "rabbithole" --兔子洞
     then
         return true
     end
@@ -155,6 +153,17 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                     local pos_in_relative = Vector3(pos_in_world.x-x, pos_in_world.y-y, pos_in_world.z-z)
                     local orient_in_world = entity.Transform:GetRotation()
                     local entity_record = {entity.prefab, pos_in_relative.x, pos_in_relative.z, orient_in_world}
+                    --判断箱子内物品
+                    if entity.components.container then
+                        local chest = entity.components.container
+                        if not chest:IsEmpty() then
+                            for k,v in pairs(chest.slots) do
+                                if v:IsValid() and v.persists then
+                                    table.insert(entity_record, v.prefab)
+                                end
+                            end
+                        end
+                    end
                     table.insert(ents_list, entity_record)
                 end
             end
@@ -207,6 +216,13 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                     local spawn_prefab = SpawnPrefab(ents_prefab)
                     spawn_prefab.Transform:SetPosition(pos_in_world:Get())
                     spawn_prefab.Transform:SetRotation(orient_in_world)
+                    if spawn_prefab.components.container then
+                        for i,prefab in pairs(v) do
+                            if i >= 5 then
+                                spawn_prefab.components.container:GiveItem(GLOBAL.SpawnPrefab(prefab))
+                            end
+                        end
+                    end
                 end
             end
             --地皮
