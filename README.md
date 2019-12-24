@@ -22,9 +22,11 @@ Press `Y` or `U` and type the following commands to excute it in the chatting wi
 
 - `+wipe`
 
-    You should add a number as the a side length of a square. `+record5` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will remove every structure and plant inside the square area. **se it with caution.**
+    You should add a number as the a side length of a square. `+wipe` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will remove every structure and plant inside the square area. **se it with caution.**
 
 BTW, the center of the square area is not exactly the character's location. It is the cross point of tile (when holding a pitchfork, your will see the lines and it's the intersection of the crosslines) which is the closest to the location of your character.
+
+The Data of your base will be saved in the Mod folder `mods\workshop-1942653373`. The files name `homedata` and `tiledata`. If you are holding a dedicated server, the files are in the mod folder of the dedicated server because it's a server-only mod. You can send these two files to your friends to duplicate a base immediately.
 
 ## Changelog
 
