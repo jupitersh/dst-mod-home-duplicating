@@ -22,7 +22,7 @@ Press `Y` or `U` and type the following commands to excute it in the chatting wi
 
 - `+wipe`
 
-    You should add a number as the a side length of a square. `+wipe` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will remove every structure and plant inside the square area. **se it with caution.**
+    You should add a number as the a side length of a square. `+wipe` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will remove every structure and plant inside the square area. **Use it with caution.**
 
 BTW, the center of the square area is not exactly the character's location. It is the cross point of tile (when holding a pitchfork, your will see the lines and it's the intersection of the crosslines) which is the closest to the location of your character.
 
