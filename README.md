@@ -4,7 +4,7 @@
 
 This is a mod for the game of Don't Starve Together which is available in the Steam Workshop. 
 
-The mod allows you to duplicate your home from one server to another server. And it can duplicate your home in the same server, too.
+The mod allows you to duplicate your home as well as things(but bundles and gifts will only be recorded as empty bundles and gifts) in the chest from one server to another server. And it can duplicate your home in the same server, too.
 
 And of couse, you should be a game admin to use it.
 
