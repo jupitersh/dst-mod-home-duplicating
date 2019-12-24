@@ -159,7 +159,15 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                         if not chest:IsEmpty() then
                             for k,v in pairs(chest.slots) do
                                 if v:IsValid() and v.persists then
-                                    table.insert(entity_record, v.prefab)
+                                    things = chest:GetItemInSlot(k)
+                                    if things.components.stackable then
+                                        slots_item_num = things.components.stackable:StackSize()
+                                    else
+                                        slots_item_num = 1
+                                    end
+                                    for kk = 1, slots_item_num do
+                                        table.insert(entity_record, v.prefab)
+                                    end
                                 end
                             end
                         end
