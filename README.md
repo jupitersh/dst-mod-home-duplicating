@@ -32,6 +32,10 @@ The Data of your base will be saved in the Mod folder `mods\workshop-1942653373\
 
 **List of tweaks I made for version 1.4.0**
 
+- Add Potted Succulent in the copy list.
+
+**List of tweaks I made for version 1.4.0**
+
 - Now we can record things in the chest and deploy them.
 - Change the save location.
 

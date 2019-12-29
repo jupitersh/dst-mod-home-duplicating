@@ -68,6 +68,7 @@ local function ShouldCopy(inst)
         or inst.prefab == "berrybush"
         or inst.prefab == "berrybush2"
         or inst.prefab == "berrybush_juicy"
+        or inst.prefab == "succulent_potted" --盆栽
         then
             return true
         end
