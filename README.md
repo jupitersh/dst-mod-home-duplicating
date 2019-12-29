@@ -30,7 +30,11 @@ The Data of your base will be saved in the Mod folder `mods\workshop-1942653373\
 
 ## Changelog
 
-**List of tweaks I made for version 1.4.0**
+**List of tweaks I made for version 1.4.3**
+
+- Add Replica Relics in the copy list.
+
+**List of tweaks I made for version 1.4.2**
 
 - Add Potted Succulent in the copy list.
 

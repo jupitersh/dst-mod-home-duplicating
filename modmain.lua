@@ -54,7 +54,7 @@ end
 
 --判定哪些物品列入复制的项目
 local function ShouldCopy(inst)
-    if inst then
+    if inst and inst.prefab then
         if inst:HasTag("structure")
         or inst:HasTag("wall")
         or inst:HasTag("flower")
@@ -69,6 +69,7 @@ local function ShouldCopy(inst)
         or inst.prefab == "berrybush2"
         or inst.prefab == "berrybush_juicy"
         or inst.prefab == "succulent_potted" --盆栽
+        or string.find(inst.prefab, "ruinsrelic") --远古家具
         then
             return true
         end
