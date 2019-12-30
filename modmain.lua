@@ -69,6 +69,7 @@ local function ShouldCopy(inst)
         or inst.prefab == "berrybush2"
         or inst.prefab == "berrybush_juicy"
         or inst.prefab == "succulent_potted" --盆栽
+        or inst.prefab == "fireflies"
         or string.find(inst.prefab, "ruinsrelic") --远古家具
         then
             return true
