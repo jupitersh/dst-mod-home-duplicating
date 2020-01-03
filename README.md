@@ -30,6 +30,10 @@ The Data of your base will be saved in the Mod folder `mods\workshop-1942653373\
 
 ## Changelog
 
+**List of tweaks I made for version 1.5.0**
+
+- Now we can record the picture of minisign.
+
 **List of tweaks I made for version 1.4.4**
 
 - Add Fireflies in the copy list.
