@@ -119,13 +119,20 @@ end
 
 --判定哪些物品要清理
 local function ShouldRemove(inst)
-    if (inst.components.inventoryitem and inst.components.inventoryitem.owner == nil) --排除人物身上的物品
-    or inst:HasTag("structure")
-    or (inst.components.burnable ~= nil and not inst:HasTag("player")) --包括所有可燃的，因玩家也可燃，故需排除
-    or inst:HasTag("boulder") --石矿
-    or inst.prefab == "rabbithole" --兔子洞
-    then
-        return true
+    if inst and inst.prefab then
+        if inst:HasTag("structure")
+        or (inst:HasTag("boulder") and inst.prefab ~= "rock_moon_shell")    --石矿
+        or inst:HasTag("plant")                                             --植物
+        or inst:HasTag("flower")                                            --花
+        or (inst:HasTag("watersource") and inst.prefab ~= "oasislake")      --池塘 排除绿洲池塘
+        or inst:HasTag("grave")                                             --墓碑
+        or inst.prefab == "rabbithole"                                      --兔子洞
+        or inst.prefab == "carrot_planted"                                  --萝卜
+        or inst.prefab == "molehill"                                        --鼹鼠洞
+        or string.find(inst.prefab, "mushroom")                             --蘑菇
+        then
+            return true
+        end
     end
     return false
 end
@@ -187,8 +194,8 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             local turf_list = {}
             local turf_style = {}
 
-            for i= (x/4-length+0.5)*4, (x/4+length-0.5)*4, 4 do
-                for j = (z/4-length+0.5)*4, (z/4+length-0.5)*4, 4 do
+            for i= (x/4-length/2+0.5)*4, (x/4+length/2-0.5)*4, 4 do
+                for j = (z/4-length/2+0.5)*4, (z/4+length/2-0.5)*4, 4 do
                     if CanTurf(Vector3(i, 0, j)) then
                         local tile = GLOBAL.TheWorld.Map:GetTileAtPoint(i, 0, j)
                         local pos_in_world = Vector3(i, 0, j)
