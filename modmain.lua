@@ -121,6 +121,11 @@ end
 local function ShouldRemove(inst)
     if inst and inst.prefab then
         if inst:HasTag("structure")
+        or inst:HasTag("wall")
+        or inst:HasTag("telebase")
+        or inst:HasTag("heavy")
+        or inst:HasTag("eyeturret")
+        or inst:HasTag("sign")
         or (inst:HasTag("boulder") and inst.prefab ~= "rock_moon_shell")    --石矿
         or inst:HasTag("plant")                                             --植物
         or inst:HasTag("flower")                                            --花
