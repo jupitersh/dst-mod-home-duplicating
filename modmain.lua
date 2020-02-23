@@ -12,7 +12,6 @@ local lang = TheNet:GetDefaultServerLanguage()
 
 local icon_list = {"󰀜","󰀝","󰀞","󰀘","󰀁","󰀟","󰀠","󰀡","󰀂","󰀃","󰀄","󰀅","󰀢","󰀣","󰀇","󰀤","󰀈","󰀙","󰀉","󰀚","󰀊","󰀋","󰀌","󰀍","󰀥","󰀎","󰀏","󰀀","󰀦","󰀐","󰀑","󰀒","󰀧","󰀨","󰀓","󰀔","󰀆","󰀩","󰀪","󰀕","󰀗","󰀫","󰀖","󰀛","󰀬","󰀭","󰀮","󰀯",}
 math.randomseed(os.time())
-local icon_num = math.random(1,48)
 
 local talkstring = {}
 if lang == "zh" then
@@ -213,7 +212,7 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             list_save(turf_list, "tiledata")
         end
         --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[icon_num]..talkstring.record..icon_list[icon_num+1],10,true,true,false)
+        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.record..icon_list[math.random(1,48)],10,true,true,false)
     end
 
     --部署，范围为正方形，以人为中心
@@ -272,7 +271,7 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             end
         end
         --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[icon_num]..talkstring.deploy..icon_list[icon_num+1],10,true,true,false)
+        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.deploy..icon_list[math.random(1,48)+1],10,true,true,false)
     end
 
     --删除范围内物品，范围为正方形，以人为中心，后面带参数为边长，单位为大格
@@ -297,6 +296,6 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
             end
         end
         --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[icon_num]..talkstring.wipe..icon_list[icon_num+1],10,true,true,false)
+        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.wipe..icon_list[math.random(1,48)+1],10,true,true,false)
     end
 end
