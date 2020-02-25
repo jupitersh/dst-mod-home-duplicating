@@ -134,6 +134,8 @@ local function ShouldRemove(inst)
         or inst.prefab == "carrot_planted"                                  --萝卜
         or inst.prefab == "molehill"                                        --鼹鼠洞
         or string.find(inst.prefab, "mushroom")                             --蘑菇
+        or inst.prefab == "succulent_potted"                                --盆栽
+        or string.find(inst.prefab, "ruinsrelic")                           --远古家具
         then
             return true
         end

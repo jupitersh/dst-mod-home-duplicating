@@ -4,7 +4,7 @@ The mod allows you to duplicate your home from one server to another server.
 And it can duplicate your home in the same server, too.
 ]]
 author = "辣椒小皇纸"
-version = "1.5.3"
+version = "1.5.4"
 
 forumthread = ""
 
