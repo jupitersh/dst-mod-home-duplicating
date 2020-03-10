@@ -212,9 +212,9 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 end
             end
             list_save(turf_list, "tiledata")
+            --执行命令后人物说话提示
+            player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.record..icon_list[math.random(1,48)],10,true,true,false)
         end
-        --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.record..icon_list[math.random(1,48)],10,true,true,false)
     end
 
     --部署，范围为正方形，以人为中心
@@ -271,9 +271,9 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 local pos_in_world = Vector3(pos_in_relative.x+x, pos_in_relative.y+y, pos_in_relative.z+z)
                 SpawnTurf(tile_num, pos_in_world)
             end
+            --执行命令后人物说话提示
+            player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.deploy..icon_list[math.random(1,48)+1],10,true,true,false)
         end
-        --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.deploy..icon_list[math.random(1,48)+1],10,true,true,false)
     end
 
     --删除范围内物品，范围为正方形，以人为中心，后面带参数为边长，单位为大格
@@ -296,8 +296,8 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                     entity:Remove()
                 end
             end
+            --执行命令后人物说话提示
+            player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.wipe..icon_list[math.random(1,48)+1],10,true,true,false)
         end
-        --执行命令后人物说话提示
-        player.components.talker:Say(icon_list[math.random(1,48)]..talkstring.wipe..icon_list[math.random(1,48)+1],10,true,true,false)
     end
 end
