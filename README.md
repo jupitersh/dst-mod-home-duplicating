@@ -1,55 +1,60 @@
-# Home Duplicating
+# 地基复制
 
 ## Overview
 
-This is a mod for the game of Don't Starve Together which is available in the Steam Workshop. 
+**现在可以记录小木牌上面画的图啦**
 
-The mod allows you to duplicate your home as well as things(but bundles and gifts will only be recorded as empty bundles and gifts) in the chest from one server to another server. And it can duplicate your home in the same server, too.
+看到大佬建的基地好羡慕，但是自己又不会建？
+让大佬通过这个Mod把基地复制给你吧。
 
-And of couse, you should be a game admin to use it.
+这个Mod可以让你把基地（包括箱子内的物品，但是包裹和礼物会被记录为空包裹和空礼物）从一个服务器复制到另一个服务器，也可以在同一个服务器内复制基地。注意是这个Mod是单纯复制基地（范围你自己设定）而不是整个地图噢。
 
-**Usage**
+当然，前提是你要有管理员权限。
 
-Press `Y` or `U` and type the following commands to excute it in the chatting window:
+用法: 按Y或者U在聊天窗口输入下面命令。
 
 - `+record`
 
-    You should add a number as the a side length of a square. For example, `+record5` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will record every structure and plant inside the square area and will record the tile, too.
+    你必须在该命令后加上数字作为正方形的边长。比如`+record5`就设定了一个以你的角色为中心的，边长为5个地皮距离的正方形区域。系统会记录下该区域内的所有建筑和植物（不包括树木），还会记录下地皮。
 
 - `+deploy`
 
-    Just type `+deploy` in the chatting window, system will automatically copy your home into the square area as you previously recorded. The square area center is also the location of your character.
+    单纯输入`+deploy`即可。系统会自动以你的角色为中心，部署你上次记录的基地连同地皮。
 
 - `+wipe`
 
-    You should add a number as the a side length of a square. `+wipe` mean that you will set a square area whose center is your character's location and whose side length is 5 turf length. System will remove every structure and plant inside the square area. **Use it with caution.**
+    你必须在该命令后加上数字作为正方形的边长。比如`+wipe5`就设定了一个以你的角色为中心的，边长为5个地皮距离的正方形区域。系统会删除该区域内的所有建筑和植物。请慎用这个命令。
 
-BTW, the center of the square area is not exactly the character's location. It is the cross point of tile (when holding a pitchfork, your will see the lines and it's the intersection of the crosslines) which is the closest to the location of your character.
+另外，请注意，上面所有的以角色为中心，并不是严格意义地以角色为中心，而是以最接近角色的地皮交汇点（就是拿着草叉时地图上显示的格子的十字点上）为中心。
 
-The Data of your base will be saved in the Mod folder `mods\workshop-1942653373\data\`. The files name `homedata` and `tiledata`. If you are holding a dedicated server, the files are in the mod folder of the dedicated server because it's a server-only mod. You can send these two files to your friends to duplicate a base immediately.
+你的基地的数据会被存储在Mod文件夹`mods\workshop-1942653373\data\`下，文件名是`homedata`和`tiledata`。如果你是运行专服(dedicated server)，文件会被储存在专服的Mod文件夹下。你可以把这两个文件发给好友让他也可以复制你宏大基地。
 
 ## Changelog
 
-**List of tweaks I made for version 1.5.0**
+### 版本1.5.6
 
-- Now we can record the picture of minisign.
+- 修复旧存档中记录了mod物品而新存档中没有该mod物品而引起的崩溃
 
-**List of tweaks I made for version 1.4.4**
+### 版本1.5.0
 
-- Add Fireflies in the copy list.
+- 现在可以记录小木牌上面画的图啦
 
-**List of tweaks I made for version 1.4.3**
+### 版本1.4.4
 
-- Add Replica Relics in the copy list.
+- 增加萤火虫记录
 
-**List of tweaks I made for version 1.4.2**
+### 版本1.4.3
 
-- Add Potted Succulent in the copy list.
+- 增加远古家具记录
 
-**List of tweaks I made for version 1.4.0**
+### 版本1.4.2
 
-- Now we can record things in the chest and deploy them.
-- Change the save location.
+- 增加盆栽记录
+
+### 版本1.4
+
+- 可以记录箱子内的物品
+- 更改基地数据储存位置
 
 ## License
 

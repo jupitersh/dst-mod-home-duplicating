@@ -243,12 +243,14 @@ GLOBAL.Networking_Say = function(guid, userid, name, prefab, message, colour, wh
                 if canspawn then
                     if ents_prefab ~= "minisign" then
                         local spawn_prefab = SpawnPrefab(ents_prefab)
-                        spawn_prefab.Transform:SetPosition(pos_in_world:Get())
-                        spawn_prefab.Transform:SetRotation(orient_in_world)
-                        if spawn_prefab.components.container then
-                            for i,prefab in pairs(v) do
-                                if i >= 5 then
-                                    spawn_prefab.components.container:GiveItem(GLOBAL.SpawnPrefab(prefab))
+                        if spawn_prefab ~= nil then
+                            spawn_prefab.Transform:SetPosition(pos_in_world:Get())
+                            spawn_prefab.Transform:SetRotation(orient_in_world)
+                            if spawn_prefab.components.container then
+                                for i,prefab in pairs(v) do
+                                    if i >= 5 then
+                                        spawn_prefab.components.container:GiveItem(GLOBAL.SpawnPrefab(prefab))
+                                    end
                                 end
                             end
                         end
