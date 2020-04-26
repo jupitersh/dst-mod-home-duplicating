@@ -74,6 +74,16 @@ local function ShouldCopy(inst)
             return true
         end
     end
+    if GetModConfigData("reeds_copy") then
+        if inst.prefab == "reeds" then
+            return true
+        end
+    end
+    if GetModConfigData("shell_copy") then
+        if inst:HasTag("singingshell") then
+            return true
+        end
+    end
     return false
 end
 
